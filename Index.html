@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta charset="UTF-8">
 		<link rel="stylesheet" href="style/style.css">
 		<script src="js/pixi.min.js"></script>
 		<script type="text/javascript">
@@ -15,10 +16,10 @@
 				app = new PIXI.Application({ 
 					width: 600,
 					height: 500,
-					antialias: true,
+					antialias: false,
 					transparent: false,
 					resolution: 1,
-					forceCanvas: true,
+					forceCanvas: false,
 					backgroundColor: 0xFFFFFF
 				});
 				canvasContainer.appendChild(app.view);
@@ -30,56 +31,45 @@
 				graphics.interactive = true;
 				graphics.buttonMode = true;
 				
+				graphics.beginFill(0xFFFFFF);
+				graphics.drawRect(0, 0, 600, 500);
+				graphics.endFill();
+				
 				graphics.on("pointerdown", mousedown);
 				graphics.on("pointermove", mousemove);
 				graphics.on("pointerup", mouseup);
 				graphics.on("pointerupoutside", mouseup);
-				graphics.on("pointerover", test);
-				
-				/*graphics.lineStyle(1, 0x000000);
-				graphics.moveTo(0,0);	
-				graphics.lineTo(100,100);*/
 				
 				app.stage.addChild(graphics);
-				
-				app.ticker.add(testloop);
-			}
-			
-			function testloop(delta){
-				
-			}
-			
-			function test (e){
-				console.log("over");
 			}
 			
 			function mousedown(e) {
 				console.log("Down");
-				x = e.offsetX;
-				y = e.offsetY;
+				x = e.data.global.x;
+				y = e.data.global.y;
 				isDrawing = true;
 			}
 			
 			function mousemove(e) {
 				if (isDrawing === true) {
-					drawLine(context, x, y, e.offsetX, e.offsetY);
-					x = e.offsetX;
-					y = e.offsetY;
+					drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
+					x = e.data.global.x;
+					y = e.data.global.y;
 				}
 			}
 			
 			function mouseup(e) {
 				if (isDrawing === true) {
-					drawLine(context, x, y, e.offsetX, e.offsetY);
+					drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
 					x = 0;
 					y = 0;
 					isDrawing = false;
 				}
 			}
 			
-			function drawLine(context, x1, y1, x2, y2) {
+			function drawLine(graphics, x1, y1, x2, y2) {
 				//graphics.beginPath();
-				graphics.lineStyle(1, 0x000000);
+				graphics.lineStyle(1, 0x000000,1,0.5,false);
 				graphics.moveTo(x1, y1);
 				graphics.lineTo(x2, y2);
 				//graphics.stroke();
