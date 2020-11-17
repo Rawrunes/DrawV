@@ -9,6 +9,7 @@
 			var isDrawing = false;
 			var x = 0;
 			var y = 0;
+			var count = 0;
 			window.onload = function(){
 				
 				var canvasContainer = document.getElementById("areaCanvasContainer");
@@ -52,9 +53,11 @@
 			
 			function mousemove(e) {
 				if (isDrawing === true) {
-					drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
-					x = e.data.global.x;
-					y = e.data.global.y;
+					if(Math.abs(x - e.data.global.x) > 2 || Math.abs(y - e.data.global.y ) > 2 ){
+						drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
+						x = e.data.global.x;
+						y = e.data.global.y;
+					}
 				}
 			}
 			
@@ -68,12 +71,15 @@
 			}
 			
 			function drawLine(graphics, x1, y1, x2, y2) {
-				//graphics.beginPath();
-				graphics.lineStyle(1, 0x000000,1,0.5,false);
-				graphics.moveTo(x1, y1);
-				graphics.lineTo(x2, y2);
-				//graphics.stroke();
-				//graphics.closePath();
+				if(!(x1 === x2 && y1 === y2)){
+					graphics.lineStyle(3, 0x000000,1,0.5,false);
+					//graphics.line.cap = PIXI.LINE_CAP.ROUND;
+					graphics.moveTo(x1, y1);
+					graphics.lineTo(x2, y2);
+					
+					// close path with smaller gaps?
+					graphics.closePath();
+				}
 			}
 		</script>
 	</head>
