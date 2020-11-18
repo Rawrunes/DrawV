@@ -10,6 +10,19 @@
 			var x = 0;
 			var y = 0;
 			var count = 0;
+			
+			// Make the redraw button
+			const redrawButton = PIXI.Sprite.from('assets/button.png');
+			redrawButton.anchor.set(0.5);
+			redrawButton.x = 40;
+			redrawButton.y = 20;
+			redrawButton.interactive = true;
+			redrawButton.buttonMode = true;
+			redrawButton.on('pointerdown', redraw);
+
+			let strokes = [];
+			let strokeCount = 0;
+
 			window.onload = function(){
 				
 				var canvasContainer = document.getElementById("areaCanvasContainer");
@@ -40,8 +53,12 @@
 				graphics.on("pointermove", mousemove);
 				graphics.on("pointerup", mouseup);
 				graphics.on("pointerupoutside", mouseup);
+
+				graphics.lineStyle(3, 0x000000,1,0.5,false);
 				
 				app.stage.addChild(graphics);
+				app.stage.addChild(redrawButton);
+				//drawTest();
 			}
 			
 			function mousedown(e) {
@@ -54,7 +71,7 @@
 			function mousemove(e) {
 				if (isDrawing === true) {
 					if(Math.abs(x - e.data.global.x) > 2 || Math.abs(y - e.data.global.y ) > 2 ){
-						drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
+						drawLine(x, y, e.data.global.x, e.data.global.y);
 						x = e.data.global.x;
 						y = e.data.global.y;
 					}
@@ -63,25 +80,67 @@
 			
 			function mouseup(e) {
 				if (isDrawing === true) {
-					drawLine(graphics, x, y, e.data.global.x, e.data.global.y);
-					x = 0;
-					y = 0;
+					drawLine(x, y, e.data.global.x, e.data.global.y);
 					isDrawing = false;
+					strokes.push(strokeCount);
+					strokeCount = 0;
 				}
 			}
 			
-			function drawLine(graphics, x1, y1, x2, y2) {
-				if(!(x1 === x2 && y1 === y2)){
-					graphics.lineStyle(3, 0x000000,1,0.5,false);
-					//graphics.line.cap = PIXI.LINE_CAP.ROUND;
-					graphics.moveTo(x1, y1);
-					graphics.lineTo(x2, y2);
-					
-					//test
-					// close path with smaller gaps?
-					graphics.closePath();
-				}
+			function drawLine(x1, y1, x2, y2) 
+			{
+				//console.log(`${x1}, ${y1}, ${x2}, ${y2}`);
+
+				//graphics.line.cap = PIXI.LINE_CAP.ROUND;
+				graphics.moveTo(x1, y1);
+				graphics.lineTo(x2, y2);
+				
+				strokeCount++;
+
+				//test
+				// close path with smaller gaps?
+				//graphics.closePath();
 			}
+
+			function redraw()
+			{
+				let lines = [];
+				graphics.geometry.graphicsData.forEach(element => {
+					lines.push(element);
+				});
+
+				graphics.geometry.clear();
+
+				lines.forEach(line => 
+				{
+					if (line.points.length == 4)
+					{
+						let p = line.points;
+						console.log(p);
+						drawLine(p[0], p[1], p[2], p[3]);
+					}
+				});
+			}
+
+			function drawTest() 
+			{
+				let px = 0;
+				let py = 0;
+				for (let x = 5; x < app.renderer.screen.width; x = x + 50) 
+				{
+					graphics.moveTo(x, y);
+					for (let y = 5; y < app.renderer.screen.height; y = y + 10)
+					{
+						let ty = y + (Math.random() * 40);
+						let tx = x + (Math.random() * 40);
+						drawLine(px, py, tx, ty);
+						py = ty;
+						px = tx;
+					}
+				}
+				
+			}
+
 		</script>
 	</head>
 	
