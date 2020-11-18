@@ -25,9 +25,6 @@
 				});
 				canvasContainer.appendChild(app.view);
 				
-				//app.view.addEventListener("touchstart", function(e) {    e.preventDefault();},{passive: false});
-				//app.view.addEventListener("touchmove", function(e) {    e.preventDefault();},{passive: false});
-				
 				graphics = new PIXI.Graphics();
 				graphics.interactive = true;
 				graphics.buttonMode = true;
@@ -35,6 +32,29 @@
 				graphics.beginFill(0xFFFFFF);
 				graphics.drawRect(0, 0, 600, 500);
 				graphics.endFill();
+				
+				/*graphics.beginFill(0x0000DD);
+				graphics.drawRect(0, 0, 600, 167);
+				graphics.endFill();
+				graphics.beginFill(0xDD0000);
+				graphics.drawRect(0, 167, 600, 333);
+				graphics.endFill();
+				graphics.beginFill(0xDDDD00);
+				graphics.drawRect(0, 334, 600, 500);
+				graphics.endFill();*/
+				
+				graphics.lineStyle(3, 0x000000,1.0,0.5,false);
+				
+				/*for(var i = 0; i < 60; i++){
+					if(i%2 === 0){
+						graphics.moveTo(i*10, 600);
+						graphics.lineTo((i+1)*10, 0);
+					}
+					else{
+						graphics.moveTo(i*10, 0);
+						graphics.lineTo((i+1)*10, 600);
+					}
+				}*/
 				
 				graphics.on("pointerdown", mousedown);
 				graphics.on("pointermove", mousemove);
@@ -72,14 +92,17 @@
 			
 			function drawLine(graphics, x1, y1, x2, y2) {
 				if(!(x1 === x2 && y1 === y2)){
-					graphics.lineStyle(3, 0x000000,1,0.5,false);
+					
 					//graphics.line.cap = PIXI.LINE_CAP.ROUND;
+					//graphics.beginFill(0x000000);
+					graphics.endFill();
 					graphics.moveTo(x1, y1);
 					graphics.lineTo(x2, y2);
+					//graphics.endFill();
 					
 					//test
 					// close path with smaller gaps?
-					graphics.closePath();
+					//graphics.closePath();
 				}
 			}
 		</script>
