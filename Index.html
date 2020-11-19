@@ -6,10 +6,14 @@
 		<script type="text/javascript">
 			let app;
 			let graphics;
+			let renderer;
 			var isDrawing = false;
 			var x = 0;
 			var y = 0;
+			var oldx = 0;
+			var oldy = 0;
 			var count = 0;
+			var eraserOn = false;
 			
 			// Make the redraw button
 			const redrawButton = PIXI.Sprite.from('assets/button.png');
@@ -45,19 +49,23 @@
 				graphics.interactive = true;
 				graphics.buttonMode = true;
 				
-				graphics.beginFill(0xFFFFFF);
-				graphics.drawRect(0, 0, 600, 500);
-				graphics.endFill();
+				graphics.clear();
+				//graphics.beginFill(0xFFFFFF);
+				//graphics.drawRect(0, 0, 600, 500);
+				//graphics.endFill();
+				graphics.moveTo(0,0);
 				
-				graphics.on("pointerdown", mousedown);
-				graphics.on("pointermove", mousemove);
-				graphics.on("pointerup", mouseup);
-				graphics.on("pointerupoutside", mouseup);
+				app.renderer.plugins.interaction.on("pointerdown", mousedown);
+				app.renderer.plugins.interaction.on("pointermove", mousemove);
+				app.renderer.plugins.interaction.on("pointerup", mouseup);
+				app.renderer.plugins.interaction.on("pointerupoutside", mouseup);
 
 				graphics.lineStyle(3, 0x000000,1,0.5,false);
 				
 				app.stage.addChild(graphics);
 				app.stage.addChild(redrawButton);
+
+				setInterval(drawUpdate, 1000/100);
 				//drawTest();
 			}
 			
@@ -65,13 +73,15 @@
 				console.log("Down");
 				x = e.data.global.x;
 				y = e.data.global.y;
+				oldx = x;
+				oldy = y;
 				isDrawing = true;
 			}
 			
 			function mousemove(e) {
 				if (isDrawing === true) {
 					if(Math.abs(x - e.data.global.x) > 2 || Math.abs(y - e.data.global.y ) > 2 ){
-						drawLine(x, y, e.data.global.x, e.data.global.y);
+						//drawLine(x, y, e.data.global.x, e.data.global.y);
 						x = e.data.global.x;
 						y = e.data.global.y;
 					}
@@ -102,6 +112,18 @@
 				//graphics.closePath();
 			}
 
+			function drawUpdate(){
+				if(isDrawing){
+					if(!(x === oldx && y === oldy)){
+						graphics.moveTo(oldx, oldy);
+						graphics.lineTo(x, y);
+						oldx = x;
+						oldy = y;
+						//redraw();
+					}
+				}
+			}
+
 			function redraw()
 			{
 				let lines = [];
@@ -110,6 +132,10 @@
 				});
 
 				graphics.geometry.clear();
+
+				graphics.beginFill(0xFFFFFF);
+				graphics.drawRect(0, 0, 600, 500);
+				graphics.endFill();
 
 				lines.forEach(line => 
 				{
@@ -141,6 +167,21 @@
 				
 			}
 
+			function clearCanvas(){
+				graphics.geometry.clear();
+			}
+
+			function toggleEraser(){
+				if(eraserOn){
+					graphics.lineStyle(3, 0x000000,1,0.5,false);
+					eraserOn = false;
+				}
+				else{
+					graphics.lineStyle(3, 0xFFFFFF,1,0.5,false);
+					eraserOn = true;
+				}
+			}
+
 		</script>
 	</head>
 	
@@ -151,7 +192,8 @@
 				<!--<canvas id="canvasDraw" width="600" height="500" />-->
 			</div>
 			<div id="areaControls">
-				<button>Test</button>
+				<button onclick="clearCanvas()">Clear</button>
+				<button id="btnEraser" onclick="toggleEraser()">Eraser</button>
 			</div>
 		</div>
 	</body>
