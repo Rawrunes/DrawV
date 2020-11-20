@@ -7,12 +7,9 @@
 			let app;
 			let graphics;
 			let renderer;
-<<<<<<< HEAD
 
 			let currentColor = '0x000000';
 			let currentSize = 3;
-=======
->>>>>>> d8f52bc5f198edae7c455aabfd5cf2b99be4153b
 			var isDrawing = false;
 			var x = 0;
 			var y = 0;
@@ -53,17 +50,9 @@
 				graphics.buttonMode = true;
 				
 				graphics.clear();
-<<<<<<< HEAD
 				
 				graphics.moveTo(0,0);
 				
-=======
-				//graphics.beginFill(0xFFFFFF);
-				//graphics.drawRect(0, 0, 600, 500);
-				//graphics.endFill();
-				graphics.moveTo(0,0);
-				
->>>>>>> d8f52bc5f198edae7c455aabfd5cf2b99be4153b
 				app.renderer.plugins.interaction.on("pointerdown", mousedown);
 				app.renderer.plugins.interaction.on("pointermove", mousemove);
 				app.renderer.plugins.interaction.on("pointerup", mouseup);
@@ -74,7 +63,6 @@
 				app.stage.addChild(graphics);
 				app.stage.addChild(redrawButton);
 
-<<<<<<< HEAD
 				//setInterval(drawUpdate, 1000/100);
 
 				let tick = 0;
@@ -96,10 +84,6 @@
 						tock = 0;
 					}
 				})
-=======
-				setInterval(drawUpdate, 1000/100);
-				//drawTest();
->>>>>>> d8f52bc5f198edae7c455aabfd5cf2b99be4153b
 			}
 			
 			function addHexColor(c1, c2) 
@@ -121,10 +105,6 @@
 			function mousemove(e) {
 				if (isDrawing === true) {
 					if(Math.abs(x - e.data.global.x) > 2 || Math.abs(y - e.data.global.y ) > 2 ){
-<<<<<<< HEAD
-=======
-						//drawLine(x, y, e.data.global.x, e.data.global.y);
->>>>>>> d8f52bc5f198edae7c455aabfd5cf2b99be4153b
 						x = e.data.global.x;
 						y = e.data.global.y;
 					}
@@ -216,19 +196,11 @@
 
 			function toggleEraser(){
 				if(eraserOn){
-<<<<<<< HEAD
 					currentColor = '0x000000';
 					eraserOn = false;
 				}
 				else{
 					currentColor = '0x4287f5';
-=======
-					graphics.lineStyle(3, 0x000000,1,0.5,false);
-					eraserOn = false;
-				}
-				else{
-					graphics.lineStyle(3, 0xFFFFFF,1,0.5,false);
->>>>>>> d8f52bc5f198edae7c455aabfd5cf2b99be4153b
 					eraserOn = true;
 				}
 			}
