@@ -6,10 +6,17 @@
 		<script type="text/javascript">
 			let app;
 			let graphics;
+			let renderer;
+
+			let currentColor = '0x000000';
+			let currentSize = 3;
 			var isDrawing = false;
 			var x = 0;
 			var y = 0;
+			var oldx = 0;
+			var oldy = 0;
 			var count = 0;
+			var eraserOn = false;
 			
 			// Make the redraw button
 			const redrawButton = PIXI.Sprite.from('assets/button.png');
@@ -19,9 +26,6 @@
 			redrawButton.interactive = true;
 			redrawButton.buttonMode = true;
 			redrawButton.on('pointerdown', redraw);
-
-			let strokes = [];
-			let strokeCount = 0;
 
 			window.onload = function(){
 				
@@ -45,33 +49,62 @@
 				graphics.interactive = true;
 				graphics.buttonMode = true;
 				
-				graphics.beginFill(0xFFFFFF);
-				graphics.drawRect(0, 0, 600, 500);
-				graphics.endFill();
+				graphics.clear();
 				
-				graphics.on("pointerdown", mousedown);
-				graphics.on("pointermove", mousemove);
-				graphics.on("pointerup", mouseup);
-				graphics.on("pointerupoutside", mouseup);
+				graphics.moveTo(0,0);
+				
+				app.renderer.plugins.interaction.on("pointerdown", mousedown);
+				app.renderer.plugins.interaction.on("pointermove", mousemove);
+				app.renderer.plugins.interaction.on("pointerup", mouseup);
+				app.renderer.plugins.interaction.on("pointerupoutside", mouseup);
 
 				graphics.lineStyle(3, 0x000000,1,0.5,false);
 				
 				app.stage.addChild(graphics);
 				app.stage.addChild(redrawButton);
-				//drawTest();
+
+				//setInterval(drawUpdate, 1000/100);
+
+				let tick = 0;
+				let tock = 0;
+				app.ticker.add((delta) => 
+				{
+					tick += delta;
+					tock += delta;
+					if (tick > 1)
+					{
+						graphics.lineStyle(currentSize, currentColor,1,0.5,false);
+						drawUpdate();
+						graphics.closePath();
+						tick = 0;
+					}
+					if (tock > 10)
+					{
+						currentColor = addHexColor(currentColor, 000010);
+						tock = 0;
+					}
+				})
 			}
 			
+			function addHexColor(c1, c2) 
+			{
+				var hexStr = (parseInt(c1, 16) + parseInt(c2, 16)).toString(16);
+				while (hexStr.length < 6) { hexStr = '0' + hexStr; } // Zero pad.
+				return hexStr;
+			}
+
 			function mousedown(e) {
-				console.log("Down");
+				console.log(currentColor);
 				x = e.data.global.x;
 				y = e.data.global.y;
+				oldx = x;
+				oldy = y;
 				isDrawing = true;
 			}
 			
 			function mousemove(e) {
 				if (isDrawing === true) {
 					if(Math.abs(x - e.data.global.x) > 2 || Math.abs(y - e.data.global.y ) > 2 ){
-						drawLine(x, y, e.data.global.x, e.data.global.y);
 						x = e.data.global.x;
 						y = e.data.global.y;
 					}
@@ -82,24 +115,24 @@
 				if (isDrawing === true) {
 					drawLine(x, y, e.data.global.x, e.data.global.y);
 					isDrawing = false;
-					strokes.push(strokeCount);
-					strokeCount = 0;
 				}
 			}
 			
 			function drawLine(x1, y1, x2, y2) 
 			{
-				//console.log(`${x1}, ${y1}, ${x2}, ${y2}`);
-
-				//graphics.line.cap = PIXI.LINE_CAP.ROUND;
 				graphics.moveTo(x1, y1);
 				graphics.lineTo(x2, y2);
-				
-				strokeCount++;
+			}
 
-				//test
-				// close path with smaller gaps?
-				//graphics.closePath();
+			function drawUpdate(){
+				if(isDrawing){
+					if(!(x === oldx && y === oldy)){
+						graphics.moveTo(oldx, oldy);
+						graphics.lineTo(x, y);
+						oldx = x;
+						oldy = y;
+					}
+				}
 			}
 
 			function redraw()
@@ -116,7 +149,7 @@
 					if (line.points.length == 4)
 					{
 						let p = line.points;
-						console.log(p);
+						graphics.lineStyle(3, line.lineStyle.color,1,0.5,false);
 						drawLine(p[0], p[1], p[2], p[3]);
 					}
 				});
@@ -141,6 +174,21 @@
 				
 			}
 
+			function clearCanvas(){
+				graphics.geometry.clear();
+			}
+
+			function toggleEraser(){
+				if(eraserOn){
+					currentColor = '0x000000';
+					eraserOn = false;
+				}
+				else{
+					currentColor = '0x4287f5';
+					eraserOn = true;
+				}
+			}
+
 		</script>
 	</head>
 	
@@ -151,7 +199,8 @@
 				<!--<canvas id="canvasDraw" width="600" height="500" />-->
 			</div>
 			<div id="areaControls">
-				<button>Test</button>
+				<button onclick="clearCanvas()">Clear</button>
+				<button id="btnEraser" onclick="toggleEraser()">Eraser</button>
 			</div>
 		</div>
 	</body>
