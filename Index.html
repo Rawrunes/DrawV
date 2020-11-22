@@ -7,9 +7,10 @@
 			let app;
 			let graphics;
 			let renderer;
-			let flipped = false;
+			let flip = false;
 			let strokes = [];
 			let strokeCount = 0;
+			let undoing = false;
 
 			let currentColor = '0x000000';
 			let currentSize = 3;
@@ -28,7 +29,7 @@
 			redrawButton.y = 20;
 			redrawButton.interactive = true;
 			redrawButton.buttonMode = true;
-			redrawButton.on('pointerdown', redraw);
+			redrawButton.on('pointerdown', redrawButtonFunction);
 
 			window.onload = function(){
 				
@@ -98,7 +99,6 @@
 			}
 
 			function mousedown(e) {
-				console.log(currentColor);
 				x = e.data.global.x;
 				y = e.data.global.y;
 				oldx = x;
@@ -117,12 +117,13 @@
 			
 			function mouseup(e) {
 				if (isDrawing === true) {
-					//drawLine(x, y, e.data.global.x, e.data.global.y);
 					isDrawing = false;
 				}
-				strokes.push(strokeCount);
-				strokeCount = 0;
-				flipped = !flipped;
+				if (strokeCount > 0)
+				{
+					strokes.push(strokeCount);
+					strokeCount = 0;
+				}
 			}
 			
 			function drawLine(x1, y1, x2, y2) 
@@ -151,11 +152,16 @@
 					lines.push(element);
 				});
 
-				// if (flipped)
-				// {
-				// 	lines.reverse();
-				// 	flipped = !flipped;
-				// }
+				// Move most recent line from start of array to end
+				if (lines.length > 0 && !undoing)
+				{
+					let line = lines.shift();
+					lines.push(line);			
+				}
+				if (undoing)
+				{
+					undoing = false;
+				}
 
 				graphics.geometry.clear();
 
@@ -170,12 +176,24 @@
 				});
 			}
 
+			function redrawButtonFunction()
+			{
+				flip = true;
+				redraw();
+			}
+
 			function undo()
 			{
-				strokes.pop();
-				let trimmed = graphics.geometry.graphicsData.slice(strokes.pop());
-				console.log(trimmed);
+				console.log(strokes);
+				console.log(graphics.geometry.graphicsData);
+
+				graphics.geometry.graphicsData.push(graphics.geometry.graphicsData.shift());
+
+				let gl = graphics.geometry.graphicsData.length;
+				let trimmed = graphics.geometry.graphicsData.slice(0, gl - strokes.pop());
+				console.log(trimmed);				
 				graphics.geometry.graphicsData = trimmed;
+				undoing = true;
 				redraw();
 			}
 
@@ -208,7 +226,7 @@
 					eraserOn = false;
 				}
 				else{
-					currentColor = '0x4287f5';
+					currentColor = '0xFFFFFF';
 					eraserOn = true;
 				}
 			}
