@@ -7,6 +7,9 @@
 			let app;
 			let graphics;
 			let renderer;
+			let flipped = false;
+			let strokes = [];
+			let strokeCount = 0;
 
 			let currentColor = '0x000000';
 			let currentSize = 3;
@@ -46,6 +49,7 @@
 				//app.view.addEventListener("touchmove", function(e) {    e.preventDefault();},{passive: false});
 				
 				graphics = new PIXI.Graphics();
+
 				graphics.interactive = true;
 				graphics.buttonMode = true;
 				
@@ -78,11 +82,11 @@
 						graphics.closePath();
 						tick = 0;
 					}
-					if (tock > 10)
-					{
-						currentColor = addHexColor(currentColor, 000010);
-						tock = 0;
-					}
+					// if (tock > 10)
+					// {
+					// 	currentColor = addHexColor(currentColor, 000010);
+					// 	tock = 0;
+					// }
 				})
 			}
 			
@@ -113,9 +117,12 @@
 			
 			function mouseup(e) {
 				if (isDrawing === true) {
-					drawLine(x, y, e.data.global.x, e.data.global.y);
+					//drawLine(x, y, e.data.global.x, e.data.global.y);
 					isDrawing = false;
 				}
+				strokes.push(strokeCount);
+				strokeCount = 0;
+				flipped = !flipped;
 			}
 			
 			function drawLine(x1, y1, x2, y2) 
@@ -131,18 +138,8 @@
 						graphics.lineTo(x, y);
 						oldx = x;
 						oldy = y;
-					}
-				}
-			}
-
-			function drawUpdate(){
-				if(isDrawing){
-					if(!(x === oldx && y === oldy)){
-						graphics.moveTo(oldx, oldy);
-						graphics.lineTo(x, y);
-						oldx = x;
-						oldy = y;
-						//redraw();
+						redraw();
+						strokeCount ++;
 					}
 				}
 			}
@@ -154,11 +151,13 @@
 					lines.push(element);
 				});
 
-				graphics.geometry.clear();
+				// if (flipped)
+				// {
+				// 	lines.reverse();
+				// 	flipped = !flipped;
+				// }
 
-				graphics.beginFill(0xFFFFFF);
-				graphics.drawRect(0, 0, 600, 500);
-				graphics.endFill();
+				graphics.geometry.clear();
 
 				lines.forEach(line => 
 				{
@@ -169,6 +168,15 @@
 						drawLine(p[0], p[1], p[2], p[3]);
 					}
 				});
+			}
+
+			function undo()
+			{
+				strokes.pop();
+				let trimmed = graphics.geometry.graphicsData.slice(strokes.pop());
+				console.log(trimmed);
+				graphics.geometry.graphicsData = trimmed;
+				redraw();
 			}
 
 			function drawTest() 
@@ -217,6 +225,7 @@
 			<div id="areaControls">
 				<button onclick="clearCanvas()">Clear</button>
 				<button id="btnEraser" onclick="toggleEraser()">Eraser</button>
+				<button id="btnUndo" onclick="undo()">Undo</button>
 			</div>
 		</div>
 	</body>
