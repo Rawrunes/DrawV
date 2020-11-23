@@ -55,3 +55,7 @@ button:hover {
 button:active {
 	background-color: #91dd93;
 }
+
+#btnClear {
+	float: right;
+}
