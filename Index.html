@@ -6,25 +6,24 @@
 		<script type="text/javascript">
 			let app;
 			let graphics;
-			let renderer;
-			let flip = false;
+
 			let strokes = [];
 			let strokeCount = 0;
+			let lastNumLines = 0;
+
+			var isDrawing = false;
+			var eraserOn = false;
+			var isUndone = false;
 			let undoing = false;
 			let drawnSinceUndo = false;
-			let lastNumLines = 0;
+			let flip = false;
 
 			let currentColor = '0x000000';
 			let currentSize = 3;
-			var isDrawing = false;
 			var x = 0;
 			var y = 0;
 			var oldx = 0;
 			var oldy = 0;
-			var count = 0;
-			var eraserOn = false;
-
-			var isUndone = false;
 			
 			// Make the redraw button
 			const redrawButton = PIXI.Sprite.from('assets/button.png');
@@ -34,6 +33,11 @@
 			redrawButton.interactive = true;
 			redrawButton.buttonMode = true;
 			redrawButton.on('pointerdown', redrawButtonFunction);
+
+			const rectangle = PIXI.Sprite.from(PIXI.Texture.WHITE);
+			rectangle.width = 600;
+			rectangle.height = 500;
+			rectangle.tint = 0xFFFFFF;
 
 			window.onload = function(){
 
@@ -57,6 +61,7 @@
 				graphics.moveTo(0,0);
 				graphics.lineStyle(3, 0x000000,1,0.5,false);
 				graphics.line.cap = PIXI.LINE_CAP.ROUND;
+
 				
 				app.renderer.plugins.interaction.on("pointerdown", mousedown);
 				app.renderer.plugins.interaction.on("pointermove", mousemove);
@@ -65,6 +70,7 @@
 
 				app.stage.addChild(graphics);
 				app.stage.addChild(redrawButton);
+				app.stage.addChildAt(rectangle,0);
 
 				let tick = 0;
 				let tock = 0;
@@ -126,7 +132,7 @@
 				{
 					strokes.push(strokeCount);
 					if(strokes.length === 1 && isUndone){
-						strokes[0]--;
+						//strokes[0]--;
 					}
 					strokeCount = 0;
 				}
@@ -186,7 +192,7 @@
 						drawLine(p[0], p[1], p[2], p[3]);
 					//}
 				});
-				graphics.moveTo(0,0);
+				//graphics.moveTo(0,0);
 			}
 
 			function redrawButtonFunction()
@@ -209,7 +215,14 @@
 				let trimmed = graphics.geometry.graphicsData.slice(0, gl - strokes.pop());
 				//console.log(trimmed);				
 				lastNumLines = trimmed.length;
-				graphics.geometry.graphicsData = trimmed;
+				if(trimmed.length){
+					graphics.geometry.graphicsData = trimmed;
+				}
+				else
+				{
+					graphics.geometry.clear();
+				}
+				
 				undoing = true;
 				drawnSinceUndo = false;
 				redraw();
@@ -242,23 +255,30 @@
 
 			function toggleEraser(e)
 			{
-				if(eraserOn){
+				if(eraserOn)
+				{
 					currentColor = '0x000000';
 					eraserOn = false;
 					document.querySelector("#btnEraser").textContent = "Eraser";
 				}
-				else{
+				else
+				{
 					currentColor = '0xFFFFFF';
 					eraserOn = true;
 					document.querySelector("#btnEraser").textContent = "Pen";
 				}
 			}
 
-			function downloadImageAsPng() {
+			function downloadImageAsPng() 
+			{
 				var renderer = app.renderer,
 					sprite = app.stage,
 					fileName = "image";
-				renderer.extract.canvas(sprite).toBlob(function(b){
+				
+				redrawButton.visible = false;
+
+				renderer.extract.canvas(sprite).toBlob(function(b)
+				{
 					var a = document.createElement('a');
 					document.body.append(a);
 					a.download = fileName;
@@ -266,6 +286,27 @@
 					a.click();
 					a.remove();
 				}, 'image/png');
+
+				redrawButton.visible = true;
+			}
+
+			function generateJSONString()
+			{
+				var lines = [],
+					jsonString;
+				graphics.geometry.graphicsData.forEach(function(g)
+				{
+					lines.push({
+						points: g.points,
+						color: g.lineStyle.color,
+						width: g.lineStyle.width
+					});
+				});
+				if(drawnSinceUndo)
+				{
+					lines.push(lines.shift());
+				}
+				return JSON.stringify(lines);
 			}
 
 		</script>
