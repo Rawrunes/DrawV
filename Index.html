@@ -309,6 +309,16 @@
 				return JSON.stringify(lines);
 			}
 
+			function playJsonString(jsonString){
+				var drawingJson = JSON.parse(jsonString);
+				for(line in drawingJson){
+					let p = drawingJson[line].points;
+					graphics.lineStyle(drawingJson[line].width, drawingJson[line].color,1,0.5,false);
+					graphics.line.cap = PIXI.LINE_CAP.ROUND;
+					drawLine(p[0], p[1], p[2], p[3]);
+				}
+			}
+
 		</script>
 	</head>
 	
