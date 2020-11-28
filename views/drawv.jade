@@ -1,0 +1,16 @@
+html
+  head
+    meta(charset='UTF-8')
+    link(rel='stylesheet' href='/stylesheets/drawv.css')
+    script(src='/javascripts/pixi.min.js')
+    script(src='/javascripts/drawv.js')
+  body
+    #areaMain
+      h1 DrawV
+      #areaCanvasContainer
+        // <canvas id="canvasDraw" width="600" height="500" />
+      #areaControls
+        button#btnEraser(onclick='toggleEraser()') Eraser
+        button#btnUndo(onclick='undo()') Undo
+        button#btnClear(onclick='clearCanvas()') Clear
+        button#btnSave(onclick='downloadImageAsPng()') Save
