@@ -316,9 +316,28 @@ let app;
 			function saveSketchToDatabase()
 			{
 				const http = new XMLHttpRequest();
-				const url = "http://192.168.88.234:3000/db/saveSketch";
+				const url = "http://127.0.0.1:3000/db/saveSketch";
 
 				http.open("POST", url);
 				http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 				http.send(generateJSONString());
+			}
+
+			function loadSketchFromDatabase()
+			{
+				const http = new XMLHttpRequest();
+				const url = "http://127.0.0.1:3000/db/getSketch";
+
+				http.onreadystatechange = function() 
+				{
+					if (http.readyState === 4) 
+					{
+					  //callback(http.response);
+					  playJsonString(JSON.parse(http.response).drawstring);
+					}
+				}
+
+				http.open("GET", url);
+				http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+				http.send();
 			}

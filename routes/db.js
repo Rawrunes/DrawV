@@ -16,7 +16,7 @@ router.get('/', function(req, res, next)
 
 router.post('/saveSketch', function(req, res, next) 
 {
-    console.log(req.body);
+    //console.log(req.body);
     client.connect( (err, client) => 
     {
         assert.equal(null, err);
@@ -24,7 +24,10 @@ router.post('/saveSketch', function(req, res, next)
 
         const db = client.db(dbName);
 
-        db.collection('sketches').insertOne(req.body, (err, response) =>
+        db.collection('sketches').insertOne({
+            drawstring : JSON.stringify(req.body),
+            timestamp : new Date()
+        }, (err, response) =>
         {
             assert.equal(null, err);
             assert.equal(1, response.insertedCount);
@@ -37,7 +40,26 @@ router.post('/saveSketch', function(req, res, next)
 
 router.get('/getSketch', function(req, res, next) 
 {
+    client.connect( async (err, client) => 
+    {
+        assert.equal(null, err);
+        console.log("Connected successfully");
 
+        const db = client.db(dbName);
+        var test;
+
+        var cursor = db.collection('sketches').find().sort({timestamp:-1});
+        while (await cursor.hasNext()) {
+            //console.log(await cursor.next());
+            test = await cursor.next();
+            break;
+        }
+        //cursor.close();
+        res.send(test);
+        
+        client.close();
+    })    
+    //db.sketches.find().sort({timestamp:1})
 });
 
 router.get('/getGallery', function (req, res, next) 
