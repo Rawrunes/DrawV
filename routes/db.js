@@ -11,6 +11,12 @@ const client = new MongoClient(url);
 /* GET home page. */
 router.get('/', function(req, res, next) 
 {
+    res.render('db', { title: 'db' });
+});
+
+router.post('/saveSketch', function(req, res, next) 
+{
+    console.log(req.body);
     client.connect( (err, client) => 
     {
         assert.equal(null, err);
@@ -18,7 +24,7 @@ router.get('/', function(req, res, next)
 
         const db = client.db(dbName);
 
-        db.collection('sketches').insertOne({a:2}, (err, response) =>
+        db.collection('sketches').insertOne(req.body, (err, response) =>
         {
             assert.equal(null, err);
             assert.equal(1, response.insertedCount);
@@ -26,13 +32,7 @@ router.get('/', function(req, res, next)
             console.log(response);
         })
         client.close();
-    })
-    res.render('db', { title: 'db' });
-});
-
-router.post('/saveSketch', function(req, res, next) 
-{
-
+    })    
 });
 
 router.get('/getSketch', function(req, res, next) 

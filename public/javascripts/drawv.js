@@ -312,3 +312,13 @@ let app;
 					drawLine(p[0], p[1], p[2], p[3]);
 				}
 			}
+
+			function saveSketchToDatabase()
+			{
+				const http = new XMLHttpRequest();
+				const url = "http://192.168.88.234:3000/db/saveSketch";
+
+				http.open("POST", url);
+				http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+				http.send(generateJSONString());
+			}
