@@ -17,7 +17,7 @@ router.get('/', function(req, res, next)
 router.post('/saveSketch', function(req, res, next) 
 {
     //console.log(req.body);
-    client.connect( (err, client) => 
+    client.connect( async (err, client) => 
     {
         assert.equal(null, err);
         console.log("Connected successfully");
@@ -34,7 +34,7 @@ router.post('/saveSketch', function(req, res, next)
 
             console.log(response);
         })
-        client.close();
+        //client.close();
     })    
 });
 
@@ -52,12 +52,12 @@ router.get('/getSketch', function(req, res, next)
         while (await cursor.hasNext()) {
             //console.log(await cursor.next());
             test = await cursor.next();
+            res.send(test);
+            cursor.close();
+            
             break;
         }
-        //cursor.close();
-        res.send(test);
-        
-        client.close();
+        //client.close();
     })    
     //db.sketches.find().sort({timestamp:1})
 });
