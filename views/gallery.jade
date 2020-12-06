@@ -6,4 +6,8 @@ block scripts
 
 block content
   h1= title
+  button#btnOverlay(onclick='toggleOverlay()') Overlay
+  #overlay(onclick='toggleOverlay()')
+    #areaInnerOverlay
+      #areaReplayCanvas
   #areaCanvasContainer

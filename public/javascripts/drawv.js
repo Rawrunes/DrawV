@@ -5,7 +5,7 @@ let strokes = [];
 let strokeCount = 0;
 let lastNumLines = 0;
 
-const SERVER = "http://192.168.88.234:3000";
+const SERVER = "http://127.0.0.1:3000";
 
 var isDrawing = false;
 var eraserOn = false;
@@ -66,6 +66,9 @@ window.onload = function(){
 		tock += delta;
 		if (tick > 1)
 		{
+			if(graphics.geometry.graphicsData.length >= 4000){
+				isDrawing = false;
+			}
 			graphics.lineStyle(currentSize, currentColor,1,0.5,false);
 			graphics.line.cap = PIXI.LINE_CAP.ROUND;
 			drawUpdate();
@@ -267,14 +270,18 @@ function downloadImageAsPng()
 
 }
 
-function generateJSONString()
+function generateJSONString(responseId)
 {
 	var lines = [],
 		jsonString;
 	graphics.geometry.graphicsData.forEach(function(g)
 	{
 		lines.push({
-			points: g.points,
+			points: [
+				Math.round((g.points[0] + Number.EPSILON) * 100) / 100,
+				Math.round((g.points[1] + Number.EPSILON) * 100) / 100,
+				Math.round((g.points[2] + Number.EPSILON) * 100) / 100,
+				Math.round((g.points[3] + Number.EPSILON) * 100) / 100],
 			color: g.lineStyle.color,
 			width: g.lineStyle.width
 		});
@@ -283,7 +290,10 @@ function generateJSONString()
 	{
 		lines.push(lines.shift());
 	}
-	return JSON.stringify(lines);
+	return JSON.stringify({
+		drawstring : lines,
+		responseid : responseId
+	});
 }
 
 function playJsonString(jsonString){
@@ -299,23 +309,24 @@ function playJsonString(jsonString){
 function saveSketchToDatabase()
 {
 	const http = new XMLHttpRequest();
-	const url = `${SERVER}/db/saveSketch`;
+	const url = SERVER + "/db/saveSketch";
+	let responseId = "";
 
 	http.open("POST", url);
 	http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	http.send(generateJSONString());
+	http.send(generateJSONString(responseId));
 }
 
 function loadSketchFromDatabase()
 {
+	let sketchId = "";
 	const http = new XMLHttpRequest();
-	const url = `${SERVER}/db/getSketch`;
+	const url = SERVER + "/db/getSketch/" + sketchId;
 
 	http.onreadystatechange = function() 
 	{
 		if (http.readyState === 4) 
 		{
-			//callback(http.response);
 			playJsonString(JSON.parse(http.response).drawstring);
 		}
 	}

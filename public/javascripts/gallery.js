@@ -1,7 +1,7 @@
 let app;
 let graphics;
 
-const SERVER = "http://192.168.88.234:3000";
+const SERVER = "http://127.0.0.1:3000";
 
 let currentColor = '0x000000';
 let currentSize = 3;
@@ -175,4 +175,13 @@ function loadSketchFromDatabase()
 	http.open("GET", url);
 	http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	http.send();
+}
+
+function toggleOverlay(){
+	if(document.getElementById("overlay").style.display === "block"){
+		document.getElementById("overlay").style.display = "none"
+	}
+	else{
+		document.getElementById("overlay").style.display = "block"
+	}
 }
