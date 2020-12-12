@@ -177,8 +177,8 @@ function loadSketchFromDatabase()
 	http.send();
 }
 
-function toggleOverlay(){
-	if(document.getElementById("overlay").style.display === "block"){
+function toggleOverlay(event){
+	if(document.getElementById("overlay").style.display === "block" && event.target.id === "overlay"){
 		document.getElementById("overlay").style.display = "none"
 	}
 	else{

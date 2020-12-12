@@ -21,17 +21,18 @@ router.post('/saveSketch', async function(req, res, next)
     {
         let verify = req.body.drawstring.filter( e => {
             return (
-                width !== 3 &&
-                !( color === "0x000000" || color === "0xFFFFFF")
+                e.width !== 3 ||
+                !( e.color === "0x000000" || e.color === "0xFFFFFF")
             );
         });
-        assert.equal(0, verify.length);
-        let r = await db.collection('sketches').insertOne({
-            timestamp : new Date(),
-            respose_id : req.body.responseid,
-            drawstring : JSON.stringify(req.body.drawstring)
-        });
-        assert.equal(1, r.insertedCount);
+        if(!verify.length){
+            let r = await db.collection('sketches').insertOne({
+                timestamp : new Date(),
+                respose_id : req.body.responseid,
+                drawstring : JSON.stringify(req.body.drawstring)
+            });
+            assert.equal(1, r.insertedCount);
+        }
     })
 });
 
