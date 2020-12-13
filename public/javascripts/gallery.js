@@ -1,7 +1,7 @@
 let app;
 let graphics;
 
-const SERVER = "http://127.0.0.1:3000";
+const SERVER = "http://amelia.crabdance.com/drawv";
 
 let currentColor = '0x000000';
 let currentSize = 3;
@@ -9,6 +9,9 @@ var x = 0;
 var y = 0;
 var oldx = 0;
 var oldy = 0;
+
+let replayCanvas;
+let replayGraphics;
 
 window.onload = function(){
 
@@ -33,7 +36,34 @@ window.onload = function(){
 	graphics.lineStyle(3, 0x000000,1,0.5,false);
 	graphics.line.cap = PIXI.LINE_CAP.ROUND;
 
+	app.renderer.plugins.interaction.on("pointerdown", (event) =>
+	{
+		console.log(event);
+	})
+
 	app.stage.addChild(graphics);
+	
+	/* ----------- Replay Canvas ---------- */
+	replayCanvas = new PIXI.Application({ 
+		width: 600,
+		height: 500,
+		antialias: false,
+		transparent: false,
+		resolution: 1,
+		forceCanvas: false,
+		backgroundColor: 0xFFFFFF
+	});
+
+	canvasContainer = document.getElementById("areaReplayCanvas");
+	canvasContainer.appendChild(replayCanvas.view);
+
+	replayGraphics = new PIXI.Graphics();
+	replayGraphics.clear();
+	replayGraphics.moveTo(0,0);
+	replayGraphics.lineStyle(3, 0x000000,1,0.5,false);
+	replayGraphics.line.cap = PIXI.LINE_CAP.ROUND;
+	
+	replayCanvas.stage.addChild(replayGraphics);
 
     getGallery();
 
@@ -64,7 +94,7 @@ function getGallery()
 function drawGallery(galleryData)
 {
     let c = {x : 0, y: 0 };
-    let s = 5;
+    let scale = 5;
     galleryData.forEach(sketch => {
         if (sketch.drawstring != undefined)
         {
@@ -74,7 +104,11 @@ function drawGallery(galleryData)
                 let p = lines[line].points;
                 graphics.lineStyle(1, lines[line].color,1,0.5,false);
                 graphics.line.cap = PIXI.LINE_CAP.ROUND;
-                drawLine(p[0]/s + c.x, p[1]/s + c.y, p[2]/s + c.x, p[3]/s + c.y);
+                drawLine(
+					p[0]/scale + c.x, 
+					p[1]/scale + c.y, 
+					p[2]/scale + c.x, 
+					p[3]/scale + c.y);
             }
             c.x += 200;
             if (c.x > 500)
@@ -101,10 +135,16 @@ function drawLine(x1, y1, x2, y2)
 	graphics.lineTo(x2, y2);
 }
 
+function drawLineReplay(x1, y1, x2, y2) 
+{
+	replayGraphics.moveTo(x1, y1);
+	replayGraphics.lineTo(x2, y2);
+}
+
 function downloadImageAsPng() 
 {
-	var renderer = app.renderer,
-		sprite = app.stage,
+	var renderer = replayCanvas.renderer,
+		sprite = replayCanvas.stage,
 		fileName = "image";
 
 	renderer.extract.canvas(sprite).toBlob(function(b)
@@ -119,55 +159,27 @@ function downloadImageAsPng()
 
 }
 
-function generateJSONString()
+function playJsonString(jsonString)
 {
-	var lines = [],
-		jsonString;
-	graphics.geometry.graphicsData.forEach(function(g)
-	{
-		lines.push({
-			points: g.points,
-			color: g.lineStyle.color,
-			width: g.lineStyle.width
-		});
-	});
-	if(drawnSinceUndo)
-	{
-		lines.push(lines.shift());
-	}
-	return JSON.stringify(lines);
-}
-
-function playJsonString(jsonString){
 	var drawingJson = JSON.parse(jsonString);
 	for(line in drawingJson){
 		let p = drawingJson[line].points;
-		graphics.lineStyle(drawingJson[line].width, drawingJson[line].color,1,0.5,false);
-		graphics.line.cap = PIXI.LINE_CAP.ROUND;
-		drawLine(p[0], p[1], p[2], p[3]);
+		replayGraphics.lineStyle(drawingJson[line].width, drawingJson[line].color,1,0.5,false);
+		replayGraphics.line.cap = PIXI.LINE_CAP.ROUND;
+		drawLineReplay(p[0], p[1], p[2], p[3]);
 	}
-}
-
-function saveSketchToDatabase()
-{
-	const http = new XMLHttpRequest();
-	const url = `${SERVER}/db/saveSketch`;
-
-	http.open("POST", url);
-	http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	http.send(generateJSONString());
 }
 
 function loadSketchFromDatabase()
 {
+	let sketchId = "";
 	const http = new XMLHttpRequest();
-	const url = `${SERVER}/db/getSketch`;
+	const url = SERVER + "/db/getSketch/" + sketchId;
 
 	http.onreadystatechange = function() 
 	{
 		if (http.readyState === 4) 
 		{
-			//callback(http.response);
 			playJsonString(JSON.parse(http.response).drawstring);
 		}
 	}
@@ -177,11 +189,19 @@ function loadSketchFromDatabase()
 	http.send();
 }
 
-function toggleOverlay(event){
+function clearCanvas()
+{
+	replayGraphics.geometry.clear();
+}
+
+function toggleOverlay(event)
+{
 	if(document.getElementById("overlay").style.display === "block" && event.target.id === "overlay"){
-		document.getElementById("overlay").style.display = "none"
+		document.getElementById("overlay").style.display = "none";
 	}
 	else{
-		document.getElementById("overlay").style.display = "block"
+		document.getElementById("overlay").style.display = "block";
+		clearCanvas();
+		loadSketchFromDatabase();
 	}
 }

@@ -5,7 +5,7 @@ let strokes = [];
 let strokeCount = 0;
 let lastNumLines = 0;
 
-const SERVER = "http://127.0.0.1:3000";
+const SERVER = "http://amelia.crabdance.com/drawv";
 
 var isDrawing = false;
 var eraserOn = false;

@@ -69,6 +69,14 @@ router.get('/getGallery', function (req, res, next)
     })
 });
 
+router.get('/getResponses/:id?', function (req, res, next) 
+{
+    execute(async (db) => {
+        let responses = await db.collection('sketches').find({respose_id: req.params.id}).sort({timestamp:1}).toArray();
+        res.send(responses);
+    })
+});
+
 async function execute(command)
 {
     const client = new MongoClient(url,{ useUnifiedTopology: true });
