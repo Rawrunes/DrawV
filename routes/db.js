@@ -69,10 +69,14 @@ router.get('/getGallery', function (req, res, next)
     })
 });
 
-router.get('/getResponses/:id?', function (req, res, next) 
+router.get('/getResponses/:id', function (req, res, next) 
 {
     execute(async (db) => {
-        let responses = await db.collection('sketches').find({respose_id: req.params.id}).sort({timestamp:1}).toArray();
+        const options = {
+            sort: { timestamp : 1},
+            projection: { drawstring : 0 }
+          };        
+        let responses = await db.collection('sketches').find({respose_id: req.params.id }, options).toArray();
         res.send(responses);
     })
 });
