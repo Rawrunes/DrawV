@@ -1,0 +1,15 @@
+extends layout
+
+block scripts
+  script(src='/drawv/javascripts/pixi.min.js')
+  script(src='/drawv/javascripts/gallery.js')
+
+block content
+  h1= title
+  button#btnOverlay(onclick='toggleOverlay(event)') Overlay
+  #overlay(onclick='toggleOverlay(event)')
+    #areaInnerOverlay
+      #areaReplayCanvas
+      #areaResponses
+        ul#responseList
+  #areaCanvasContainer
