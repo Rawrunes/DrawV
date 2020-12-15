@@ -308,13 +308,22 @@ function playJsonString(jsonString){
 
 function saveSketchToDatabase()
 {
-	const http = new XMLHttpRequest();
-	const url = SERVER + "/db/saveSketch";
-	let responseId = "";
+	if(graphics.geometry.graphicsData.length){
+		const http = new XMLHttpRequest();
+		const url = SERVER + "/db/saveSketch";
+		let responseId = "";
 
-	http.open("POST", url);
-	http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	http.send(generateJSONString(responseId));
+		http.onreadystatechange = function() 
+		{
+			if (http.readyState === 4) 
+			{
+				navigateToGallery();
+			}
+		}
+		http.open("POST", url);
+		http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		http.send(generateJSONString(responseId));
+	}
 }
 
 function loadSketchFromDatabase()
@@ -334,4 +343,9 @@ function loadSketchFromDatabase()
 	http.open("GET", url);
 	http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	http.send();
+}
+
+function navigateToGallery()
+{
+	window.location.href = SERVER + "/gallery";
 }

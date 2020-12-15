@@ -32,6 +32,7 @@ router.post('/saveSketch', async function(req, res, next)
                 drawstring : JSON.stringify(req.body.drawstring)
             });
             assert.equal(1, r.insertedCount);
+            res.send("");
         }
     })
 });

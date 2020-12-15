@@ -273,9 +273,15 @@ function toggleOverlay(event)
 	}
 }
 
-function loadOverlay(thumb){
+function loadOverlay(thumb)
+{
 	document.getElementById("overlay").style.display = "block";
 	clearCanvas();
 	playJsonString(thumb.drawstring);
 	loadResponses(thumb.sketchId);
+}
+
+function navigateToCanvas(response_id)
+{
+	window.location.href = SERVER + ((response_id)? '?response_id=' + response_id : '');
 }

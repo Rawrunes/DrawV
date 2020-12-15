@@ -5,8 +5,9 @@ block scripts
   script(src='/drawv/javascripts/gallery.js')
 
 block content
-  h1= title
-  button#btnOverlay(onclick='toggleOverlay(event)') Overlay
+  #header
+    h1= title
+    button#btnToCanvas(onclick='navigateToCanvas()') Draw something!
   #overlay(onclick='toggleOverlay(event)')
     #areaInnerOverlay
       #areaReplayCanvas

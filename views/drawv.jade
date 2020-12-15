@@ -7,12 +7,12 @@ html
   body
     #areaMain
       h1 DrawV
+      #areaHeader
+        button#btnToGallery(onclick='navigateToGallery()') View Gallery
+        button#btnSave(onclick='downloadImageAsPng()') Save
       #areaCanvasContainer
-        // <canvas id="canvasDraw" width="600" height="500" />
       #areaControls
         button#btnEraser(onclick='toggleEraser()') Eraser
         button#btnUndo(onclick='undo()') Undo
-        button#btnClear(onclick='clearCanvas()') Clear
-        button#btnSave(onclick='downloadImageAsPng()') Save
         button#btnSubmit(onclick='saveSketchToDatabase()') Submit
-        button#btnLoad(onclick='loadSketchFromDatabase()') Load
+        button#btnClear(onclick='clearCanvas()') Clear
