@@ -91,7 +91,6 @@ function getGallery()
 			//callback(http.response);
             //playJsonString(JSON.parse(http.response).drawstring);
             let galleryData = JSON.parse(http.response);
-            console.log(galleryData);
             drawGallery(galleryData)
 		}
 	}
@@ -105,7 +104,7 @@ function drawGallery(galleryData)
 {
     let cursor = {x : 1, y: 0 };
 
-    galleryData.forEach(sketch => {
+    galleryData.forEach((sketch, index) => {
         if (sketch.drawstring != undefined)
         {
             let lines = JSON.parse(sketch.drawstring);
@@ -124,15 +123,12 @@ function drawGallery(galleryData)
 			)
 
             for(line in lines){
-                let p = lines[line].points;
                 graphics.lineStyle(1, lines[line].color,1,0.5,false);
 				graphics.line.cap = PIXI.LINE_CAP.ROUND;
 				
-                drawLine(
-					p[0]/thumbScale + cursor.x, 
-					p[1]/thumbScale + cursor.y, 
-					p[2]/thumbScale + cursor.x, 
-					p[3]/thumbScale + cursor.y);
+				let newPoints = cropOutOfBoundsLine(cursor, thumbWidth, thumbHeight, thumbScale, lines[line].points, index);
+
+                drawLine(newPoints[0], newPoints[1], newPoints[2], newPoints[3]);
             }
 			cursor.x += thumbWidth + gutterSpace;
 
@@ -145,6 +141,46 @@ function drawGallery(galleryData)
         }
 
     });
+}
+
+function cropOutOfBoundsLine(cursor, thumbWidth, thumbHeight, thumbScale, points, thumbindex)
+{
+	let leftBound = cursor.x;
+	let rightBound = cursor.x + thumbWidth;
+	let topBound = cursor.y;
+	let bottomBound = cursor.y + thumbHeight;
+
+	let bounds = [leftBound, rightBound, topBound, bottomBound];
+
+	let xPoints = [points[0]/thumbScale + cursor.x, points[2]/thumbScale + cursor.x];
+	let yPoints = [points[1]/thumbScale + cursor.y, points[3]/thumbScale + cursor.y];
+
+	xPoints.forEach((point, index) => 
+	{
+		if (point < leftBound)
+		{
+			xPoints[index] = leftBound;
+		}
+		if (point > rightBound)
+		{
+			xPoints[index] = rightBound;
+		}
+	})
+	yPoints.forEach((point, index) => 
+	{
+		if (point < topBound)
+		{
+			yPoints[index] = topBound;
+		}
+		if (point > bottomBound)
+		{
+			yPoints[index] = bottomBound;
+		}
+	})
+
+	let newPoints = [xPoints[0], yPoints[0], xPoints[1], yPoints[1]];
+
+	return newPoints;
 }
 
 function pickDrawing(event)
