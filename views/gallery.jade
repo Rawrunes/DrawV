@@ -10,7 +10,11 @@ block content
     button#btnToCanvas(onclick='navigateToCanvas()') Draw something!
   #overlay(onclick='toggleOverlay(event)')
     #areaInnerOverlay
+      #areaHeader
       #areaReplayCanvas
+      #areaControls
+        button#btnRespond(onclick='navigateToCanvas()') Respond
+        button#btnSave(onclick='downloadImageAsPng()') Save Image
       #areaResponses
         ul#responseList
   #areaCanvasContainer

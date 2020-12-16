@@ -1,7 +1,7 @@
 let app;
 let graphics;
 
-const SERVER = "http://amelia.crabdance.com/drawv";
+const SERVER = "http://127.0.0.1:3000/drawv";
 
 let currentColor = '0x000000';
 let currentSize = 3;
@@ -246,9 +246,8 @@ function playJsonString(jsonString)
 	}
 }
 
-function loadSketchFromDatabase()
+function loadSketchFromDatabase(sketchId)
 {
-	let sketchId = "";
 	const http = new XMLHttpRequest();
 	const url = SERVER + "/db/getSketch/" + sketchId;
 
@@ -256,7 +255,11 @@ function loadSketchFromDatabase()
 	{
 		if (http.readyState === 4) 
 		{
-			playJsonString(JSON.parse(http.response).drawstring);
+			//playJsonString(JSON.parse(http.response).drawstring);
+			loadOverlay({
+				drawstring: JSON.parse(http.response).drawstring,
+				sketchId: sketchId
+			});
 		}
 	}
 
@@ -267,7 +270,6 @@ function loadSketchFromDatabase()
 
 function loadResponses(sketchId)
 {
-	//let sketchId = "5fd534c36a8c7e2315b80024";
 	const http = new XMLHttpRequest();
 	const url = SERVER + "/db/getResponses/" + sketchId;
 
@@ -280,7 +282,7 @@ function loadResponses(sketchId)
 			list.innerHTML = "";
 			response.forEach(r => {
 				let date = new Date(r.timestamp);
-				list.innerHTML += "<li>" + "Response from " + date.toLocaleDateString() + " at " + date.toLocaleTimeString() + "</li>";
+				list.innerHTML += "<li data-id='" + r._id + "' onclick='navigateToResponse(event)'>" + "Response from " + date.toLocaleDateString() + " at " + date.toLocaleTimeString() + "</li>";
 			});
 		}
 	}
@@ -301,12 +303,6 @@ function toggleOverlay(event)
 	if(document.getElementById("overlay").style.display === "block" && event.target.id === "overlay"){
 		document.getElementById("overlay").style.display = "none";
 	}
-	else{
-		document.getElementById("overlay").style.display = "block";
-		clearCanvas();
-		loadSketchFromDatabase();
-		loadResponses();
-	}
 }
 
 function loadOverlay(thumb)
@@ -320,4 +316,9 @@ function loadOverlay(thumb)
 function navigateToCanvas(response_id)
 {
 	window.location.href = SERVER + ((response_id)? '?response_id=' + response_id : '');
+}
+
+function navigateToResponse(event)
+{
+	loadSketchFromDatabase(event.target.dataset.id);
 }

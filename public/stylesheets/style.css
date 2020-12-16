@@ -44,15 +44,44 @@ a {
 	border: 1px black solid;
 }
 
+#areaControls {
+	margin-left: auto;
+	margin-right: auto;
+	width: 602px;
+	margin-top: 10px;
+}
+
+#areaControls button{
+	width: 295px;
+}
+
+#areaControls button:last-child{
+	margin-left: 12px;
+}
+
 #areaResponses {
 	margin-left: auto;
 	margin-right: auto;
-	width: 600px;
+	width: 602px;
 	margin-top: 10px;
 }
 
 #responseList {
+	list-style-type: none;
+	list-style-position: outside;
+	padding: 0;
+	margin-top: 10px;
+}
 
+#responseList li {
+	display: block;
+	border: 1px black solid;
+	padding: 10px;
+	cursor: pointer;
+}
+
+#responseList li:hover {
+	background-color: #ddecff;
 }
 
 button {

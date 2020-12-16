@@ -5,7 +5,7 @@ let strokes = [];
 let strokeCount = 0;
 let lastNumLines = 0;
 
-const SERVER = "http://amelia.crabdance.com/drawv";
+const SERVER = "http://127.0.0.1:3000/drawv";
 
 var isDrawing = false;
 var eraserOn = false;
@@ -308,22 +308,25 @@ function playJsonString(jsonString){
 
 function saveSketchToDatabase()
 {
-	if(graphics.geometry.graphicsData.length){
-		const http = new XMLHttpRequest();
-		const url = SERVER + "/db/saveSketch";
-		let responseId = "";
+	var r = confirm("Are you sure you want to submit your drawing?");
+	if (r === true) {
+		if(graphics.geometry.graphicsData.length){
+			const http = new XMLHttpRequest();
+			const url = SERVER + "/db/saveSketch";
+			let responseId = "";
 
-		http.onreadystatechange = function() 
-		{
-			if (http.readyState === 4) 
+			http.onreadystatechange = function() 
 			{
-				navigateToGallery();
+				if (http.readyState === 4) 
+				{
+					navigateToGallery();
+				}
 			}
+			http.open("POST", url);
+			http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			http.send(generateJSONString(responseId));
 		}
-		http.open("POST", url);
-		http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		http.send(generateJSONString(responseId));
-	}
+	} 
 }
 
 function loadSketchFromDatabase()
@@ -347,5 +350,5 @@ function loadSketchFromDatabase()
 
 function navigateToGallery()
 {
-	window.location.href = SERVER + "/gallery";
+	window.location.href = SERVER + "/gallery";		
 }
