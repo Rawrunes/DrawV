@@ -18,7 +18,12 @@ let thumbScale = 3;
 let thumbWidth = 600 / thumbScale;
 let thumbHeight = 500 / thumbScale;
 
+let galleryData = {};
+
 let thumbs = [];
+
+let hovering = false;
+let lastHover = "";
 
 let replayCanvas;
 let replayGraphics;
@@ -77,6 +82,10 @@ window.onload = function(){
 	{
 		pickDrawing(event);
 	})
+	app.renderer.plugins.interaction.on("pointermove", (event) =>
+	{
+		hoverDrawing(event);
+	})	
 }
 
 function getGallery()
@@ -90,9 +99,8 @@ function getGallery()
 		{
 			//callback(http.response);
             //playJsonString(JSON.parse(http.response).drawstring);
-            let galleryData = JSON.parse(http.response);
-            console.log(galleryData);
-            drawGallery(galleryData)
+            galleryData = JSON.parse(http.response);
+            drawGallery()
 		}
 	}
 
@@ -101,15 +109,41 @@ function getGallery()
 	http.send();    
 }
 
-function drawGallery(galleryData)
+function drawGallery(selectedThumb = 0)
 {
-    let cursor = {x : 1, y: 0 };
+	let cursor = {x : 1, y: 0 };
+	
+	// Keep track of where in the graphics 
+	//   array the current drawing's lines are
+	let graphicsIndexStart = 0;
+	let graphicsIndexEnd = 0;
+	let oldScale = thumbScale;
 
-    galleryData.forEach(sketch => {
+    galleryData.forEach((sketch, index) => {
         if (sketch.drawstring != undefined)
         {
-            let lines = JSON.parse(sketch.drawstring);
-			
+			thumbScale = oldScale;
+			if (index == selectedThumb)
+			{
+				thumbScale = thumbScale*.8;
+			}
+			let lines = JSON.parse(sketch.drawstring);
+
+			for(line in lines){
+				let p = lines[line].points;
+				graphics.lineStyle(1, lines[line].color,1,0.5,false);
+				graphics.line.cap = PIXI.LINE_CAP.ROUND;
+				
+				drawLine(
+					p[0]/thumbScale + cursor.x, 
+					p[1]/thumbScale + cursor.y, 
+					p[2]/thumbScale + cursor.x, 
+					p[3]/thumbScale + cursor.y
+				);
+
+				graphicsIndexEnd += 1;
+			}
+
 			graphics.lineStyle(1, "#FFFFFF",1,0.5,false);
 			graphics.drawRect(cursor.x, cursor.y, thumbWidth, thumbHeight);
 			thumbs.push(
@@ -119,21 +153,14 @@ function drawGallery(galleryData)
 					x2 : cursor.x + thumbWidth,
 					y2 : cursor.y + thumbHeight,
 					sketchId : sketch._id,
-					drawstring : sketch.drawstring
+					drawstring : sketch.drawstring,
+					start : graphicsIndexStart,
+					end : graphicsIndexEnd
 				}
 			)
 
-            for(line in lines){
-                let p = lines[line].points;
-                graphics.lineStyle(1, lines[line].color,1,0.5,false);
-				graphics.line.cap = PIXI.LINE_CAP.ROUND;
-				
-                drawLine(
-					p[0]/thumbScale + cursor.x, 
-					p[1]/thumbScale + cursor.y, 
-					p[2]/thumbScale + cursor.x, 
-					p[3]/thumbScale + cursor.y);
-            }
+			graphicsIndexStart = graphicsIndexEnd;
+
 			cursor.x += thumbWidth + gutterSpace;
 
             if (cursor.x + appPadding + thumbWidth + gutterSpace > appWidth)
@@ -160,6 +187,25 @@ function pickDrawing(event)
 			}
 		}
 	})
+}
+
+function hoverDrawing(event)
+{
+	let coords = event.data.global;
+	thumbs.forEach((thumb, index) => 
+	{
+		if (coords.x > thumb.x1 && coords.x < thumb.x2)
+		{
+			if (coords.y > thumb.y1 && coords.y < thumb.y2)
+			{
+				if (lastHover != thumb.sketchId){
+					graphics.clear();
+					drawGallery(index);
+				}
+				lastHover = thumb.sketchId;
+			}		
+		}
+	})	
 }
 
 function addHexColor(c1, c2) 
