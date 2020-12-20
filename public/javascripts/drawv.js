@@ -5,7 +5,7 @@ let strokes = [];
 let strokeCount = 0;
 let lastNumLines = 0;
 
-const SERVER = "http://127.0.0.1:3000/drawv";
+const SERVER = "http://amelia.crabdance.com/drawv";
 
 var isDrawing = false;
 var eraserOn = false;
@@ -313,7 +313,7 @@ function saveSketchToDatabase()
 		if(graphics.geometry.graphicsData.length){
 			const http = new XMLHttpRequest();
 			const url = SERVER + "/db/saveSketch";
-			let responseId = "";
+			let responseId = getResponseId();
 
 			http.onreadystatechange = function() 
 			{
@@ -351,4 +351,9 @@ function loadSketchFromDatabase()
 function navigateToGallery()
 {
 	window.location.href = SERVER + "/gallery";		
+}
+
+function getResponseId(){
+	const urlParams = new URLSearchParams(window.location.search);
+	return ((urlParams.get("response_id"))? urlParams.get("response_id") : "");
 }

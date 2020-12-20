@@ -1,7 +1,7 @@
 let app;
 let graphics;
 
-const SERVER = "http://127.0.0.1:3000/drawv";
+const SERVER = "http://amelia.crabdance.com/drawv";
 
 let currentColor = '0x000000';
 let currentSize = 3;
@@ -9,6 +9,9 @@ var x = 0;
 var y = 0;
 var oldx = 0;
 var oldy = 0;
+
+let currentSketchesLoaded = 0;
+let totalSketchesLoaded = 0;
 
 let appWidth = window.innerWidth;
 let appHeight = window.innerHeight;
@@ -22,6 +25,8 @@ let thumbs = [];
 
 let replayCanvas;
 let replayGraphics;
+
+let response_id;
 
 window.onload = function(){
 
@@ -79,10 +84,10 @@ window.onload = function(){
 	})
 }
 
-function getGallery()
+function getGallery(index = 0)
 {
 	const http = new XMLHttpRequest();
-	const url = `${SERVER}/db/getGallery`;
+	const url = `${SERVER}/db/getGallery/${index}`;
 
 	http.onreadystatechange = function() 
 	{
@@ -104,43 +109,71 @@ function drawGallery(galleryData)
 {
     let cursor = {x : 1, y: 0 };
 
-    galleryData.forEach((sketch, index) => {
-        if (sketch.drawstring != undefined)
-        {
-            let lines = JSON.parse(sketch.drawstring);
-			
-			graphics.lineStyle(1, "#FFFFFF",1,0.5,false);
-			graphics.drawRect(cursor.x, cursor.y, thumbWidth, thumbHeight);
-			thumbs.push(
-				{
-					x1 : cursor.x,
-					y1 : cursor.y,
-					x2 : cursor.x + thumbWidth,
-					y2 : cursor.y + thumbHeight,
-					sketchId : sketch._id,
-					drawstring : sketch.drawstring
-				}
-			)
-
-            for(line in lines){
-                graphics.lineStyle(1, lines[line].color,1,0.5,false);
-				graphics.line.cap = PIXI.LINE_CAP.ROUND;
+	for (let index = 0; index < galleryData.length; index++) {
+		let sketch = galleryData[index];
+		console.log(galleryData.length);
+		if (cursor.y + thumbHeight + gutterSpace + appPadding < appHeight)
+		{
+			currentSketchesLoaded = index+1;
+			if (sketch.drawstring != undefined)
+			{
+				let lines = JSON.parse(sketch.drawstring);
 				
-				let newPoints = cropOutOfBoundsLine(cursor, thumbWidth, thumbHeight, thumbScale, lines[line].points, index);
+				graphics.lineStyle(1, "#FFFFFF",1,0.5,false);
+				graphics.drawRect(cursor.x, cursor.y, thumbWidth, thumbHeight);
+				thumbs.push(
+					{
+						x1 : cursor.x,
+						y1 : cursor.y,
+						x2 : cursor.x + thumbWidth,
+						y2 : cursor.y + thumbHeight,
+						sketchId : sketch._id,
+						drawstring : sketch.drawstring,
+						responseId : sketch.respose_id,
+						timestamp : sketch.timestamp
+					}
+				)
+	
+				for(line in lines){
+					graphics.lineStyle(1, lines[line].color,1,0.5,false);
+					graphics.line.cap = PIXI.LINE_CAP.ROUND;
+					
+					let newPoints = cropOutOfBoundsLine(cursor, thumbWidth, thumbHeight, thumbScale, lines[line].points, index);
+	
+					drawLine(newPoints[0], newPoints[1], newPoints[2], newPoints[3]);
+				}
+				cursor.x += thumbWidth + gutterSpace;
+	
+				if (cursor.x + appPadding + thumbWidth + gutterSpace > appWidth)
+				{
+					cursor.y += thumbHeight + gutterSpace;
+					cursor.x = 1;
+				}
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+	totalSketchesLoaded += currentSketchesLoaded;
+}
 
-                drawLine(newPoints[0], newPoints[1], newPoints[2], newPoints[3]);
-            }
-			cursor.x += thumbWidth + gutterSpace;
+function next()
+{
+	graphics.clear();
+	getGallery(totalSketchesLoaded);
+}
 
-            if (cursor.x + appPadding + thumbWidth + gutterSpace > appWidth)
-            {
-                cursor.y += thumbHeight + gutterSpace;
-                cursor.x = 1;
-            }
-            
-        }
-
-    });
+function prev()
+{
+	totalSketchesLoaded = totalSketchesLoaded - currentSketchesLoaded * 2;
+	if (totalSketchesLoaded < 0)
+	{
+		totalSketchesLoaded = 0;
+	}
+	graphics.clear();
+	getGallery(totalSketchesLoaded);
 }
 
 function cropOutOfBoundsLine(cursor, thumbWidth, thumbHeight, thumbScale, points, thumbindex)
@@ -256,9 +289,12 @@ function loadSketchFromDatabase(sketchId)
 		if (http.readyState === 4) 
 		{
 			//playJsonString(JSON.parse(http.response).drawstring);
+			let response = JSON.parse(http.response);
 			loadOverlay({
-				drawstring: JSON.parse(http.response).drawstring,
-				sketchId: sketchId
+				drawstring: response.drawstring,
+				sketchId: sketchId,
+				timestamp: response.timestamp,
+				responseId: response.respose_id
 			});
 		}
 	}
@@ -302,18 +338,35 @@ function toggleOverlay(event)
 {
 	if(document.getElementById("overlay").style.display === "block" && event.target.id === "overlay"){
 		document.getElementById("overlay").style.display = "none";
+		response_id = "";
 	}
 }
 
 function loadOverlay(thumb)
 {
 	document.getElementById("overlay").style.display = "block";
+	if(thumb.responseId){
+		document.getElementById("areaHeaderTitle").style.display = "none";
+		document.getElementById("areaHeaderLink").style.display = "block";
+		document.getElementById("areaHeaderLink").dataset.id = thumb.responseId;
+		document.getElementById("replayLink").dataset.id = thumb.responseId;
+		let date = new Date(thumb.timestamp);
+		document.getElementById("replayLink").innerHTML = "Response from " + date.toLocaleDateString() + " at " + date.toLocaleTimeString();
+	}
+	else{
+		document.getElementById("areaHeaderTitle").style.display = "block";
+		document.getElementById("areaHeaderLink").style.display = "none";
+		let date = new Date(thumb.timestamp);
+		document.getElementById("replayTitle").innerHTML = "Sketch from " + date.toLocaleDateString() + " at " + date.toLocaleTimeString();
+	}
+	response_id = thumb.sketchId;
 	clearCanvas();
 	playJsonString(thumb.drawstring);
 	loadResponses(thumb.sketchId);
+	
 }
 
-function navigateToCanvas(response_id)
+function navigateToCanvas()
 {
 	window.location.href = SERVER + ((response_id)? '?response_id=' + response_id : '');
 }

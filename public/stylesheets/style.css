@@ -7,7 +7,7 @@ a {
   color: #00B7FF;
 }
 
-#header {
+#header, #navigation {
 	margin-bottom: 10px;
 }
 
@@ -29,9 +29,30 @@ a {
 	margin-right: auto;
 	padding-top: 10px;
 	background-color: white;
-	width: 800px;
+	width: 700px;
 	margin-top: 50px;
-	height: 70%;
+	/*height: 70%;*/
+}
+
+#areaHeaderTitle, #areaHeaderLink {
+	margin-left: auto;
+	margin-right: auto;
+	width: 600px;
+	margin-top: 10px;
+	border: 1px black solid;
+	background-color: white;
+}
+
+#areaHeaderLink {
+	cursor: pointer;
+}
+
+#areaHeaderLink:hover {
+	background-color: #ddecff;
+}
+
+#areaHeaderLink:active {
+	background-color: white;
 }
 
 #areaReplayCanvas {
@@ -64,6 +85,7 @@ a {
 	margin-right: auto;
 	width: 602px;
 	margin-top: 10px;
+	padding-bottom: 10px;
 }
 
 #responseList {
@@ -78,6 +100,7 @@ a {
 	border: 1px black solid;
 	padding: 10px;
 	cursor: pointer;
+	margin-bottom: 5px;
 }
 
 #responseList li:hover {
@@ -101,4 +124,14 @@ button:hover {
 
 button:active {
 	background-color: #ffffff;
+}
+
+#navigation button {
+	margin-right: 10px;
+}
+
+h2 {
+	padding: 10px;
+	margin: 0px;
+	font-size: 16px;
 }

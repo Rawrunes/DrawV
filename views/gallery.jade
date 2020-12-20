@@ -8,9 +8,15 @@ block content
   #header
     h1= title
     button#btnToCanvas(onclick='navigateToCanvas()') Draw something!
+  #navigation
+    button#btnLoadMore(onclick='prev()') Prev
+    button#btnLoadMore(onclick='next()') Next
   #overlay(onclick='toggleOverlay(event)')
     #areaInnerOverlay
-      #areaHeader
+      #areaHeaderLink(onclick='navigateToResponse(event)')
+        h2#replayLink Test
+      #areaHeaderTitle
+        h2#replayTitle Test
       #areaReplayCanvas
       #areaControls
         button#btnRespond(onclick='navigateToCanvas()') Respond
