@@ -12,6 +12,8 @@ var oldy = 0;
 
 let currentSketchesLoaded = 0;
 let totalSketchesLoaded = 0;
+let prevSketchesLoaded = 0;
+let sketchesPerPage = 0;
 
 let appWidth = window.innerWidth;
 let appHeight = window.innerHeight;
@@ -108,10 +110,10 @@ function getGallery(index = 0)
 function drawGallery(galleryData)
 {
     let cursor = {x : 1, y: 0 };
+	currentSketchesLoaded = 0;
 
 	for (let index = 0; index < galleryData.length; index++) {
 		let sketch = galleryData[index];
-		console.log(galleryData.length);
 		if (cursor.y + thumbHeight + gutterSpace + appPadding < appHeight)
 		{
 			currentSketchesLoaded = index+1;
@@ -153,6 +155,7 @@ function drawGallery(galleryData)
 		}
 		else
 		{
+			sketchesPerPage = index;
 			break;
 		}
 	}
@@ -161,13 +164,28 @@ function drawGallery(galleryData)
 
 function next()
 {
+	let pageLeap = totalSketchesLoaded;
+	if (currentSketchesLoaded < sketchesPerPage) 
+	{
+		pageLeap = totalSketchesLoaded - currentSketchesLoaded;
+		totalSketchesLoaded = totalSketchesLoaded - currentSketchesLoaded;
+	}
+	if(sketchesPerPage == 0)
+	{
+		pageLeap = 0;
+	}
 	graphics.clear();
-	getGallery(totalSketchesLoaded);
+	getGallery(pageLeap);
 }
 
 function prev()
 {
-	totalSketchesLoaded = totalSketchesLoaded - currentSketchesLoaded * 2;
+	let pageLeap = sketchesPerPage * 2;
+	if (currentSketchesLoaded < sketchesPerPage)
+	{
+		pageLeap = currentSketchesLoaded + sketchesPerPage;
+	}
+	totalSketchesLoaded = totalSketchesLoaded - pageLeap;
 	if (totalSketchesLoaded < 0)
 	{
 		totalSketchesLoaded = 0;

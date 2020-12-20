@@ -34,6 +34,9 @@ router.post('/saveSketch', async function(req, res, next)
             assert.equal(1, r.insertedCount);
             res.send("");
         }
+        else{
+            res.status(406).send("Validation of the line data unsuccessful.");
+        }
     })
 });
 
@@ -65,9 +68,15 @@ router.get('/getSketch/:id?', async function(req, res, next)
 router.get('/getGallery/:index?', function (req, res, next) 
 {
     execute(async (db) => {
-        let sketches = await db.collection('sketches').find({}).sort({timestamp:-1}).toArray();
-        sketches = sketches.slice(req.params.index, req.params.index + 50);
-        console.log(sketches.length);
+        let sketches = [];
+        let data = await db.collection('sketches').find({}).sort({timestamp:-1}).toArray();
+        data = data.slice(req.params.index, req.params.index + 50);
+        data.forEach((sketch) => {
+            if (sketch.drawstring !== undefined)
+            {
+                sketches.push(sketch);
+            }
+        });
         res.send(sketches);
     })
 });

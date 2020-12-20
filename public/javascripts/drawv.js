@@ -319,7 +319,12 @@ function saveSketchToDatabase()
 			{
 				if (http.readyState === 4) 
 				{
-					navigateToGallery();
+					if(http.status >= 400){
+						showError(http.response);
+					}
+					else{
+						navigateToGallery();
+					}
 				}
 			}
 			http.open("POST", url);
@@ -356,4 +361,10 @@ function navigateToGallery()
 function getResponseId(){
 	const urlParams = new URLSearchParams(window.location.search);
 	return ((urlParams.get("response_id"))? urlParams.get("response_id") : "");
+}
+
+function showError(text){
+	var errorText = "ERROR: " + text;
+	alert(errorText);
+	console.log(errorText);
 }
