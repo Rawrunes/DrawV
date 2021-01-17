@@ -4,6 +4,7 @@ let graphics;
 let strokes = [];
 let strokeCount = 0;
 let lastNumLines = 0;
+const MAX_LINES = 4000;
 
 const SERVER = "http://amelia.crabdance.com/drawv";
 
@@ -66,13 +67,14 @@ window.onload = function(){
 		tock += delta;
 		if (tick > 1)
 		{
-			if(graphics.geometry.graphicsData.length >= 4000){
+			if(graphics.geometry.graphicsData.length >= MAX_LINES){
 				isDrawing = false;
 			}
 			graphics.lineStyle(currentSize, currentColor,1,0.5,false);
 			graphics.line.cap = PIXI.LINE_CAP.ROUND;
 			drawUpdate();
 			graphics.closePath();
+			updateInk();
 			tick = 0;
 		}
 		// if (tock > 10)
@@ -252,6 +254,20 @@ function toggleEraser(e)
 	}
 }
 
+function eraser()
+{
+	currentColor = '0xFFFFFF';
+	eraserOn = true;
+	document.querySelector("#btnEraser").textContent = "Pen";
+}
+
+function brush()
+{
+	currentColor = '0x000000';
+	eraserOn = false;
+	document.querySelector("#btnEraser").textContent = "Eraser";
+}
+
 function downloadImageAsPng() 
 {
 	var renderer = app.renderer,
@@ -367,4 +383,9 @@ function showError(text){
 	var errorText = "ERROR: " + text;
 	alert(errorText);
 	console.log(errorText);
+}
+
+function updateInk(){
+	var inkMeter = document.getElementById("ink");
+	inkMeter.innerHTML = "" + Math.round((graphics.geometry.graphicsData.length / 4000) * 100) + "%";
 }

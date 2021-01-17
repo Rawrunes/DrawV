@@ -4,11 +4,14 @@ html
     link(rel='stylesheet' href='/drawv/stylesheets/drawv.css')
     script(src='/drawv/javascripts/pixi.min.js')
     script(src='/drawv/javascripts/drawv.js')
+    script(src='/drawv/javascripts/keyboard.js')
   body
     #areaMain
       h1 DrawV
       #areaHeader
         button#btnToGallery(onclick='navigateToGallery()') View Gallery
+        h2#inkMeter Ink: 
+        h2#ink 100%
         button#btnSave(onclick='downloadImageAsPng()') Save
       #areaCanvasContainer
       #areaControls

@@ -64,3 +64,14 @@ button:active {
 #btnClear, #btnSave{
 	float: right;
 }
+
+#inkMeter, #ink {
+	font-size: 14pt;
+	font-weight: normal;
+	display: inline;
+	font-family: Arial, Helvetica, sans-serif;	
+}
+
+#inkMeter{
+	margin-left: 20px;
+}
